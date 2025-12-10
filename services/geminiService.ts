@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { MODELS } from '../constants';
 import { OutfitItem, WeatherData } from '../types';
 
@@ -17,12 +17,35 @@ export const createClient = (config: GenConfig) => {
   const DEFAULT_BASE_URL = 'https://vip.apiyi.com';
   
   // Use the user provided URL (trimmed) or fallback to the proxy default
-  // This effectively removes the default official Google endpoint unless manually entered
-  const baseUrl = config.baseUrl?.trim() || DEFAULT_BASE_URL;
+  let baseUrl = config.baseUrl?.trim() || DEFAULT_BASE_URL;
+  // Remove trailing slash if present to ensure clean path concatenation
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
   
+  // @ts-ignore - Ignoring type check for requestInterceptor to ensure compatibility
   return new GoogleGenAI({ 
     apiKey, 
-    baseUrl 
+    baseUrl,
+    requestInterceptor: (request: any) => {
+      // Initialize headers if they don't exist
+      if (!request.headers) {
+        request.headers = {};
+      }
+
+      // FIX 1: Ensure Content-Type is set to application/json
+      request.headers['Content-Type'] = 'application/json';
+
+      // FIX 2: Add Authorization: Bearer <key>
+      // Many proxies (like apiyi) often expect the key in the Authorization header 
+      // with a Bearer prefix to handle authentication before forwarding to Google.
+      request.headers['Authorization'] = `Bearer ${apiKey}`;
+
+      // FIX 3: Explicitly set x-goog-api-key as well, just in case the SDK didn't or the proxy looks here
+      request.headers['x-goog-api-key'] = apiKey;
+
+      return request;
+    }
   });
 };
 
