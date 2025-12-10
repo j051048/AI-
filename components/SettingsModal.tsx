@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from './ui/Modal';
 import { Settings, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
-import { Save, Wifi } from 'lucide-react';
+import { Save, Wifi, Eye, EyeOff } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -16,13 +16,22 @@ interface Props {
 export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSave, lang, onTest }) => {
   const t = TRANSLATIONS[lang];
   const [localSettings, setLocalSettings] = useState<Settings>(settings);
+  const [showKey, setShowKey] = useState(false);
 
   const handleChange = (field: keyof Settings, value: string) => {
+    // For API key and URL, we don't trim while typing to allow pasting, 
+    // but we will trim on save/test actions.
     setLocalSettings(prev => ({ ...prev, [field]: value }));
   };
 
+  const getCleanSettings = () => ({
+    ...localSettings,
+    apiKey: localSettings.apiKey.trim(),
+    baseUrl: localSettings.baseUrl.trim()
+  });
+
   const handleSave = () => {
-    onSave(localSettings);
+    onSave(getCleanSettings());
     onClose();
   };
 
@@ -31,13 +40,24 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
       <div className="space-y-4">
         <div>
           <label className="block text-white/70 text-sm mb-1">{t.apiKey}</label>
-          <input 
-            type="password" 
-            value={localSettings.apiKey}
-            onChange={(e) => handleChange('apiKey', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50"
-            placeholder="AIzaSy..."
-          />
+          <div className="relative">
+            <input 
+              type={showKey ? "text" : "password"}
+              value={localSettings.apiKey}
+              onChange={(e) => handleChange('apiKey', e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50 pr-10"
+              placeholder="AIzaSy..."
+            />
+            <button 
+              onClick={() => setShowKey(!showKey)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+            >
+              {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          <p className="text-xs text-white/40 mt-1">
+            {lang === 'cn' ? '请确保没有复制多余的空格' : 'Ensure no leading/trailing spaces'}
+          </p>
         </div>
 
         <div>
@@ -47,7 +67,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
             value={localSettings.baseUrl}
             onChange={(e) => handleChange('baseUrl', e.target.value)}
             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50"
-            placeholder="https://generativelanguage.googleapis.com"
+            placeholder="https://vip.apiyi.com"
           />
         </div>
 
@@ -72,7 +92,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
 
         <div className="pt-4 flex gap-3">
            <button 
-            onClick={() => onTest(localSettings)}
+            onClick={() => onTest(getCleanSettings())}
             className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium flex items-center justify-center gap-2 transition-colors"
           >
             <Wifi className="w-4 h-4" />

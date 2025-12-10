@@ -8,14 +8,22 @@ interface GenConfig {
 }
 
 export const createClient = (config: GenConfig) => {
-  if (!config.apiKey) throw new Error('API Key is missing');
+  // CRITICAL FIX: Trim whitespace that often occurs during copy-paste
+  const apiKey = config.apiKey?.trim();
   
-  const options: any = { apiKey: config.apiKey };
-  if (config.baseUrl) {
-    options.baseUrl = config.baseUrl;
-  }
+  if (!apiKey) throw new Error('API Key is missing');
   
-  return new GoogleGenAI(options);
+  // User requested default to this specific third-party proxy
+  const DEFAULT_BASE_URL = 'https://vip.apiyi.com';
+  
+  // Use the user provided URL (trimmed) or fallback to the proxy default
+  // This effectively removes the default official Google endpoint unless manually entered
+  const baseUrl = config.baseUrl?.trim() || DEFAULT_BASE_URL;
+  
+  return new GoogleGenAI({ 
+    apiKey, 
+    baseUrl 
+  });
 };
 
 export const getAdvice = async (
