@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { MODELS } from '../constants';
 import { OutfitItem, WeatherData } from '../types';
 
@@ -7,46 +6,70 @@ interface GenConfig {
   baseUrl?: string;
 }
 
-export const createClient = (config: GenConfig) => {
-  // CRITICAL FIX: Trim whitespace that often occurs during copy-paste
+// Helper: Direct Fetch to bypass SDK restrictions and handle proxy Auth headers correctly
+const fetchGemini = async (
+  model: string,
+  payload: any,
+  config: GenConfig
+) => {
   const apiKey = config.apiKey?.trim();
-  
   if (!apiKey) throw new Error('API Key is missing');
-  
-  // User requested default to this specific third-party proxy
-  const DEFAULT_BASE_URL = 'https://vip.apiyi.com';
-  
-  // Use the user provided URL (trimmed) or fallback to the proxy default
-  let baseUrl = config.baseUrl?.trim() || DEFAULT_BASE_URL;
-  // Remove trailing slash if present to ensure clean path concatenation
-  if (baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-  
-  // @ts-ignore - Ignoring type check for requestInterceptor to ensure compatibility
-  return new GoogleGenAI({ 
-    apiKey, 
-    baseUrl,
-    requestInterceptor: (request: any) => {
-      // Initialize headers if they don't exist
-      if (!request.headers) {
-        request.headers = {};
+
+  // Default to the requested proxy
+  let baseUrl = config.baseUrl?.trim() || 'https://vip.apiyi.com';
+  // Ensure clean URL construction
+  if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+
+  // Construct standard Gemini REST endpoint
+  const url = `${baseUrl}/v1beta/models/${model}:generateContent`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // CRITICAL FIX: Use Bearer Token as required by the proxy
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      let errMsg = `API Error: ${response.status}`;
+      try {
+        const errJson = JSON.parse(errText);
+        // Handle Google-style error wrapping
+        if (errJson.error && errJson.error.message) {
+          errMsg = errJson.error.message;
+        }
+      } catch (e) {
+        // use raw text if json parse fails
+        if (errText.length < 100) errMsg += ` (${errText})`;
       }
-
-      // FIX 1: Ensure Content-Type is set to application/json
-      request.headers['Content-Type'] = 'application/json';
-
-      // FIX 2: Add Authorization: Bearer <key>
-      // Many proxies (like apiyi) often expect the key in the Authorization header 
-      // with a Bearer prefix to handle authentication before forwarding to Google.
-      request.headers['Authorization'] = `Bearer ${apiKey}`;
-
-      // FIX 3: Explicitly set x-goog-api-key as well, just in case the SDK didn't or the proxy looks here
-      request.headers['x-goog-api-key'] = apiKey;
-
-      return request;
+      throw new Error(errMsg);
     }
-  });
+
+    return await response.json();
+  } catch (error: any) {
+    console.error('Gemini API Fetch Error:', error);
+    throw new Error(error.message || 'Network request failed');
+  }
+};
+
+// Exported helper to test connection from App.tsx
+export const testApiKey = async (config: GenConfig) => {
+  const payload = {
+    contents: [{ parts: [{ text: "Hello" }] }]
+  };
+  // Use a lightweight model for testing
+  return fetchGemini('gemini-2.5-flash', payload, config);
+};
+
+export const createClient = (config: GenConfig) => {
+  // Deprecated: SDK removed to fix proxy issues.
+  // Kept empty to prevent import crashes during hot-reload if App.tsx hasn't updated yet.
+  return {};
 };
 
 export const getAdvice = async (
@@ -55,7 +78,6 @@ export const getAdvice = async (
   lang: 'en' | 'cn',
   config: GenConfig
 ): Promise<{ weather: WeatherData; outfit: OutfitItem[] }> => {
-  const ai = createClient(config);
   
   const languagePrompt = lang === 'cn' ? 'Response in Simplified Chinese.' : 'Response in English.';
   
@@ -80,25 +102,26 @@ export const getAdvice = async (
     }
   `;
 
-  // We use the flash model for logic/text
-  const response = await ai.models.generateContent({
-    model: MODELS['text-model'],
-    contents: prompt,
-    config: {
-        // responseMimeType: 'application/json', // REMOVED: Cannot use JSON mode with Tools
-        tools: [{ googleSearch: {} }] // Use Search Grounding for accurate weather
-    }
-  });
+  // Construct payload manually
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    // Use googleSearch tool for grounding
+    tools: [{ googleSearch: {} }] 
+  };
 
-  const text = response.text;
+  const data = await fetchGemini(MODELS['text-model'], payload, config);
+
+  const candidate = data.candidates?.[0];
+  const text = candidate?.content?.parts?.[0]?.text;
+  
   if (!text) throw new Error('No response from AI');
 
-  // Clean markdown code blocks if present (e.g. ```json ... ```)
+  // Clean markdown code blocks if present
   const jsonStr = text.replace(/```json/gi, '').replace(/```/g, '').trim();
 
   try {
-    const data = JSON.parse(jsonStr);
-    return data;
+    const parsed = JSON.parse(jsonStr);
+    return parsed;
   } catch (e) {
     console.error("Failed to parse JSON", text);
     throw new Error('AI returned invalid format');
@@ -111,8 +134,6 @@ export const generateAvatar = async (
   modelAlias: 'nano-banana' | 'nano-banana-pro',
   config: GenConfig
 ): Promise<string> => {
-  const ai = createClient(config);
-  
   const outfitDesc = outfit.map(i => `${i.color} ${i.name}`).join(', ');
   const modelName = MODELS[modelAlias];
 
@@ -124,21 +145,23 @@ export const generateAvatar = async (
     Aspect Ratio: 9:16 (Vertical).
   `;
 
-  // For nano-banana series (image generation models), we use generateContent
-  const response = await ai.models.generateContent({
-    model: modelName,
-    contents: prompt,
-    config: {
-        // Nano banana models don't support responseMimeType or tools usually for pure image gen
-    }
-  });
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }]
+  };
 
-  // Extract image
-  if (response.candidates && response.candidates[0].content.parts) {
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData && part.inlineData.data) {
-        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
+  const data = await fetchGemini(modelName, payload, config);
+
+  // Extract image from REST response structure
+  // candidates[0].content.parts[].inlineData
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  
+  for (const part of parts) {
+    // Handle both camelCase (SDK style) and snake_case (Raw JSON style) just in case
+    const inlineData = part.inlineData || part.inline_data;
+    if (inlineData && inlineData.data) {
+      // Prioritize mimeType from response, fallback to png if missing
+      const mimeType = inlineData.mimeType || inlineData.mime_type || 'image/png';
+      return `data:${mimeType};base64,${inlineData.data}`;
     }
   }
 

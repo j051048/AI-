@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Layout } from './components/Layout';
 import { SettingsModal } from './components/SettingsModal';
 import { ToastContainer } from './components/ui/Toast';
-import { getAdvice, generateAvatar, createClient } from './services/geminiService';
+import { getAdvice, generateAvatar, testApiKey } from './services/geminiService';
 import { 
   AppState, Settings, Language, Theme, Gender, ToastMessage, OutfitItem 
 } from './types';
@@ -73,10 +73,10 @@ const App: React.FC = () => {
       return;
     }
     try {
-      const client = createClient({ apiKey: testSettings.apiKey });
-      await client.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: 'Test'
+      // Use new service function to test connection via fetch
+      await testApiKey({ 
+        apiKey: testSettings.apiKey, 
+        baseUrl: testSettings.baseUrl 
       });
       addToast(t.testSuccess, 'success');
     } catch (e) {
@@ -101,7 +101,10 @@ const App: React.FC = () => {
 
     try {
       // 1. Get Weather & Outfit Text
-      const advice = await getAdvice(cityInput, state.gender, state.language, { apiKey: settings.apiKey });
+      const advice = await getAdvice(cityInput, state.gender, state.language, { 
+        apiKey: settings.apiKey,
+        baseUrl: settings.baseUrl
+      });
       
       setState(prev => ({
         ...prev,
@@ -132,7 +135,10 @@ const App: React.FC = () => {
         state.gender, 
         currentOutfit, 
         settings.model,
-        { apiKey: settings.apiKey }
+        { 
+          apiKey: settings.apiKey,
+          baseUrl: settings.baseUrl
+        }
       );
       setState(prev => ({ ...prev, generatedImage: base64Image, isGeneratingImage: false }));
     } catch (e) {
