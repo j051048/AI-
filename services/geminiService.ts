@@ -16,12 +16,12 @@ const fetchGemini = async (
   if (!apiKey) throw new Error('API Key is missing');
 
   // Default to the requested proxy
-  let baseUrl = config.baseUrl?.trim() || 'https://vip.apiyi.com';
+  let baseUrl = config.baseUrl?.trim() || 'https://proxy.flydao.top/v1';
   // Ensure clean URL construction
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
 
   // Construct standard Gemini REST endpoint
-  const url = `${baseUrl}/v1beta/models/${model}:generateContent`;
+  const url = `${baseUrl}/models/${model}:generateContent`;
 
   try {
     const response = await fetch(url, {
@@ -89,7 +89,8 @@ export const getAdvice = async (
     {
       "weather": {
         "city": "${city}",
-        "temp": "temperature with unit",
+        "temp": "current temperature with unit",
+        "tempRange": "daily low temp - daily high temp (e.g. -5°C / 2°C)",
         "condition": "short description (e.g., Sunny, Rainy)",
         "humidity": "percentage (optional)"
       },
@@ -132,13 +133,17 @@ export const generateAvatar = async (
   gender: string,
   outfit: OutfitItem[],
   modelAlias: 'nano-banana' | 'nano-banana-pro',
-  config: GenConfig
+  config: GenConfig,
+  lang: 'en' | 'cn'
 ): Promise<string> => {
   const outfitDesc = outfit.map(i => `${i.color} ${i.name}`).join(', ');
   const modelName = MODELS[modelAlias];
 
+  // Specific prompt adjustment for Asian ethnicity when in Chinese mode
+  const ethnicity = lang === 'cn' ? 'East Asian' : '';
+
   const prompt = `
-    Full body fashion shot of a trendy ${gender} university student standing on a modern university campus.
+    Full body fashion shot of a trendy ${ethnicity} ${gender} university student standing on a modern university campus.
     Wearing: ${outfitDesc}.
     Style: Casual, clean, academic aesthetic, photorealistic, soft lighting, 8k resolution.
     Pose: Standing confidently, looking at camera.

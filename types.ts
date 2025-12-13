@@ -11,6 +11,7 @@ export interface Settings {
 export interface WeatherData {
   city: string;
   temp: string;
+  tempRange: string; // New field for min/max temp
   condition: string;
   humidity?: string;
 }

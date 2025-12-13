@@ -138,7 +138,8 @@ const App: React.FC = () => {
         { 
           apiKey: settings.apiKey,
           baseUrl: settings.baseUrl
-        }
+        },
+        state.language // Passed language to support East Asian prompt
       );
       setState(prev => ({ ...prev, generatedImage: base64Image, isGeneratingImage: false }));
     } catch (e) {
@@ -149,6 +150,14 @@ const App: React.FC = () => {
   };
 
   // --- Render Components ---
+
+  // Placeholder Data for Initial State
+  const defaultOutfit = [1, 2, 3, 4].map(i => ({ 
+    id: i.toString(), 
+    name: t.placeholders.item, 
+    color: '---', 
+    type: '---' 
+  }));
 
   return (
     <Layout gradient={THEMES[state.theme].gradient}>
@@ -236,41 +245,43 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Weather Card */}
-            {state.weather && (
-                <div className="glass-panel p-5 rounded-3xl animate-in fade-in slide-in-from-left-4 duration-500">
-                    <div className="flex items-center gap-3 mb-2">
-                        <CloudSun className="w-6 h-6 text-yellow-300" />
-                        <h3 className="font-semibold text-lg">{t.weatherTitle}</h3>
-                    </div>
-                    <div className="flex items-end gap-2">
-                        <span className="text-4xl font-bold">{state.weather.temp}</span>
-                        <span className="text-white/80 pb-1 mb-1">{state.weather.condition}</span>
-                    </div>
-                    <div className="text-sm text-white/60 mt-1">{state.weather.city}</div>
+            {/* Weather Card - Always Visible */}
+            <div className="glass-panel p-5 rounded-3xl animate-in fade-in slide-in-from-left-4 duration-500">
+                <div className="flex items-center gap-3 mb-2">
+                    <CloudSun className="w-6 h-6 text-yellow-300" />
+                    <h3 className="font-semibold text-lg">{t.weatherTitle}</h3>
                 </div>
-            )}
+                <div className="flex items-end gap-2 mb-1">
+                    <span className="text-4xl font-bold">{state.weather ? state.weather.temp : t.placeholders.temp}</span>
+                    <span className="text-white/80 pb-1 mb-1">{state.weather ? state.weather.condition : t.placeholders.condition}</span>
+                </div>
+                {/* Temp Range */}
+                <div className="text-sm text-white/90 mb-2 font-medium">
+                    {state.weather ? state.weather.tempRange : t.placeholders.tempRange}
+                </div>
+                <div className="text-xs text-white/50">{state.weather ? state.weather.city : t.placeholders.city}</div>
+            </div>
 
-            {/* Outfit List (Scrollable on mobile) */}
-            {state.outfit.length > 0 && (
-                <div className="glass-panel p-5 rounded-3xl flex-1 min-h-[200px] flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                    <div className="flex items-center gap-3 mb-4">
-                        <Shirt className="w-6 h-6 text-pink-300" />
-                        <h3 className="font-semibold text-lg">{t.outfitTitle}</h3>
-                    </div>
-                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
-                        {state.outfit.map((item, idx) => (
-                            <div key={item.id} className="bg-white/5 rounded-xl p-3 flex items-center justify-between group hover:bg-white/10 transition-colors">
-                                <div>
-                                    <p className="font-medium">{item.name}</p>
-                                    <p className="text-xs text-white/50">{item.color} • {item.type}</p>
-                                </div>
-                                <span className="w-6 h-6 rounded-full border border-white/20" style={{ backgroundColor: item.color.toLowerCase().includes('white') ? '#eee' : item.color }}></span>
-                            </div>
-                        ))}
-                    </div>
+            {/* Outfit List - Always Visible */}
+            <div className="glass-panel p-5 rounded-3xl flex-1 min-h-[200px] flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                <div className="flex items-center gap-3 mb-4">
+                    <Shirt className="w-6 h-6 text-pink-300" />
+                    <h3 className="font-semibold text-lg">{t.outfitTitle}</h3>
                 </div>
-            )}
+                <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                    {(state.outfit.length > 0 ? state.outfit : defaultOutfit).map((item, idx) => (
+                        <div key={item.id} className={`bg-white/5 rounded-xl p-3 flex items-center justify-between group hover:bg-white/10 transition-colors ${!state.outfit.length ? 'opacity-50' : ''}`}>
+                            <div>
+                                <p className="font-medium">{item.name}</p>
+                                {state.outfit.length > 0 && (
+                                    <p className="text-xs text-white/50">{item.color} • {item.type}</p>
+                                )}
+                            </div>
+                            <span className="w-6 h-6 rounded-full border border-white/20" style={{ backgroundColor: item.color && item.color.toLowerCase().includes('white') ? '#eee' : item.color }}></span>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
 
         {/* Right Column (Avatar Display) */}

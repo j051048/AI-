@@ -67,7 +67,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
             value={localSettings.baseUrl}
             onChange={(e) => handleChange('baseUrl', e.target.value)}
             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50"
-            placeholder="https://vip.apiyi.com"
+            placeholder="https://proxy.flydao.top/v1"
           />
         </div>
 
