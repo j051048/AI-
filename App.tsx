@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const INITIAL_SETTINGS: Settings = {
-  apiKey: '',
+  apiKey: '123456789', // Default API Key as requested
   baseUrl: '',
   model: 'nano-banana'
 };
@@ -21,7 +21,14 @@ const App: React.FC = () => {
   // --- State ---
   const [settings, setSettings] = useState<Settings>(() => {
     const saved = localStorage.getItem('unistyle_settings');
-    return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+    // If saved exists, use it. If not, use INITIAL_SETTINGS.
+    // Note: If a user already has settings without a key, they might need to reset or manually enter it once.
+    // To strictly enforce the default if missing in saved data, we can merge:
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...INITIAL_SETTINGS, ...parsed, apiKey: parsed.apiKey || INITIAL_SETTINGS.apiKey };
+    }
+    return INITIAL_SETTINGS;
   });
   
   const [state, setState] = useState<AppState>({

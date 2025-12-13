@@ -27,7 +27,7 @@ export const MODELS = {
 
 export const TRANSLATIONS = {
   en: {
-    appTitle: 'UniStyle AI',
+    appTitle: 'UniStyle AI (Real Person Ver.)',
     searchPlaceholder: 'Enter city (e.g., Tokyo)',
     weatherTitle: 'Current Weather',
     outfitTitle: 'OOTD Recommendation',
@@ -38,7 +38,7 @@ export const TRANSLATIONS = {
     model: 'Model',
     testConnection: 'Test Connection',
     save: 'Save',
-    gender: { male: 'Boy', female: 'Girl' },
+    gender: { male: 'Male', female: 'Female' },
     loading: 'Thinking...',
     generating: 'Designing...',
     error: 'Error',
@@ -56,7 +56,7 @@ export const TRANSLATIONS = {
     }
   },
   cn: {
-    appTitle: '大学生穿搭神器',
+    appTitle: 'AI天气查询穿搭推荐神器（真人版）',
     searchPlaceholder: '输入城市 (如: 北京)',
     weatherTitle: '当地天气',
     outfitTitle: '今日穿搭推荐',

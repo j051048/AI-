@@ -81,9 +81,18 @@ export const getAdvice = async (
   
   const languagePrompt = lang === 'cn' ? 'Response in Simplified Chinese.' : 'Response in English.';
   
+  // Randomize styles to ensure diversity on refresh
+  const styles = ['Casual', 'Smart Casual', 'Business', 'Streetwear', 'Minimalist', 'Athleisure', 'Trendy', 'Workwear'];
+  const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+
   const prompt = `
     Find the current typical weather for ${city} using Google Search if necessary. 
-    Based on this weather, suggest a stylish "University Student" outfit for a ${gender}.
+    Based on this weather, suggest a stylish outfit for a ${gender} (age 18-38).
+    
+    Target Style: ${randomStyle}.
+    Randomly select the colors and items to be different from generic defaults.
+    The outfit should be suitable for a mix of university students or working professionals.
+
     ${languagePrompt}
     Return ONLY a raw JSON string (do not include markdown code blocks) with this schema:
     {
@@ -142,11 +151,16 @@ export const generateAvatar = async (
   // Specific prompt adjustment for Asian ethnicity when in Chinese mode
   const ethnicity = lang === 'cn' ? 'East Asian' : '';
 
+  // Broaden background context for the new age group (18-38)
+  const backgrounds = ['modern city street', 'trendy cafe', 'creative office space', 'urban park', 'minimalist architecture'];
+  const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+
   const prompt = `
-    Full body fashion shot of a trendy ${ethnicity} ${gender} university student standing on a modern university campus.
+    Full body fashion shot of a stylish ${ethnicity} ${gender} (approx 18-38 years old).
     Wearing: ${outfitDesc}.
-    Style: Casual, clean, academic aesthetic, photorealistic, soft lighting, 8k resolution.
-    Pose: Standing confidently, looking at camera.
+    Background: ${randomBackground}.
+    Style: Photorealistic, cinematic lighting, 8k resolution, high fashion or clean lifestyle photography.
+    Pose: Natural, confident, relaxed.
     Aspect Ratio: 9:16 (Vertical).
   `;
 
