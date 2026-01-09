@@ -3,19 +3,19 @@ import { Theme } from './types';
 export const THEMES: Record<Theme, { primary: string; gradient: string }> = {
   sakura: { 
     primary: '#FB7185', 
-    gradient: 'from-rose-400 via-pink-500 to-rose-500' 
+    gradient: 'from-[#2e021d] via-[#4a0d28] to-[#9d174d]' // Deep Atmospheric Red
   },
   malibu: { 
     primary: '#38BDF8', 
-    gradient: 'from-sky-400 via-blue-500 to-cyan-500' 
+    gradient: 'from-[#0c4a6e] via-[#075985] to-[#0ea5e9]' // Deep Ocean Blue
   },
   pistachio: { 
     primary: '#34D399', 
-    gradient: 'from-emerald-400 via-teal-500 to-green-500' 
+    gradient: 'from-[#064e3b] via-[#065f46] to-[#10b981]' // Deep Forest
   },
   lavender: { 
     primary: '#A78BFA', 
-    gradient: 'from-violet-400 via-purple-500 to-indigo-500' 
+    gradient: 'from-[#2e1065] via-[#4c1d95] to-[#7c3aed]' // Deep Cosmic Purple
   },
 };
 
@@ -29,59 +29,59 @@ export const TRANSLATIONS = {
   en: {
     appTitle: 'UniStyle AI (Real Person Ver.)',
     searchPlaceholder: 'Enter city (e.g., Tokyo)',
-    weatherTitle: 'Current Weather',
-    outfitTitle: 'OOTD Recommendation',
-    generateBtn: 'Refresh Look',
-    settings: 'Settings',
-    apiKey: 'API Key',
-    baseUrl: 'Default Gateway (Default: https://proxy.flydao.top/v1)',
-    model: 'Model',
-    testConnection: 'Test Connection',
-    save: 'Save',
-    gender: { male: 'Male', female: 'Female' },
-    loading: 'Thinking...',
-    generating: 'Designing...',
-    error: 'Error',
-    success: 'Success',
-    enterKey: 'Please enter your Gemini API Key',
-    testSuccess: 'Connection Successful!',
-    testFail: 'Connection Failed. Check Key.',
-    emptyCity: 'Please enter a city name',
+    weatherTitle: 'Now',
+    outfitTitle: 'The Look',
+    generateBtn: 'Regenerate',
+    settings: 'Configuration',
+    apiKey: 'Access Token',
+    baseUrl: 'Gateway (Default: https://proxy.flydao.top/v1)',
+    model: 'Engine',
+    testConnection: 'Ping',
+    save: 'Apply',
+    gender: { male: 'Him', female: 'Her' },
+    loading: 'Analyzing Atmosphere...',
+    generating: 'Rendering Style...',
+    error: 'System Error',
+    success: 'Saved',
+    enterKey: 'Token Required',
+    testSuccess: 'Link Established',
+    testFail: 'Link Failed',
+    emptyCity: 'Input Location',
     placeholders: {
-        temp: '--°C',
-        tempRange: 'L:--° H:--°',
-        condition: 'Waiting...',
-        city: 'City not selected',
-        item: 'Waiting for recommendation...'
+        temp: '--',
+        tempRange: 'L -- / H --',
+        condition: 'Clear',
+        city: 'Select Location',
+        item: 'Awaiting data...'
     }
   },
   cn: {
     appTitle: 'AI天气查询穿搭推荐神器（真人版）',
-    searchPlaceholder: '输入城市 (如: 北京)',
-    weatherTitle: '当地天气',
-    outfitTitle: '今日穿搭推荐',
-    generateBtn: '刷新形象',
-    settings: '配置',
+    searchPlaceholder: '探索城市...',
+    weatherTitle: '此刻',
+    outfitTitle: '今日灵感',
+    generateBtn: '重塑风格',
+    settings: '系统配置',
     apiKey: 'API 密钥',
-    baseUrl: '默认网关 (默认: https://proxy.flydao.top/v1)',
-    model: '模型',
-    testConnection: '测试连接',
-    save: '保存',
-    gender: { male: '男生', female: '女生' },
-    loading: '思考中...',
-    generating: '生成中...',
-    error: '错误',
-    success: '成功',
-    enterKey: '请输入您的 Gemini API Key',
-    testSuccess: '连接成功！',
-    testFail: '连接失败，请检查密钥。',
-    emptyCity: '请输入城市名称',
+    baseUrl: 'API 网关 (默认: https://proxy.flydao.top/v1)',
+    model: '生成引擎',
+    testConnection: '网络测试',
+    save: '确认生效',
+    gender: { male: '男士', female: '女士' },
+    loading: '解析气象数据...',
+    generating: '构想穿搭方案...',
+    error: '系统异常',
+    success: '已保存',
+    enterKey: '请输入 API 密钥',
+    testSuccess: '连接成功',
+    testFail: '连接失败，请检查密钥',
+    emptyCity: '请输入城市',
     placeholders: {
-        temp: '--°C',
-        tempRange: '低温 --° / 高温 --°',
-        condition: '等待查询...',
-        city: '未选择城市',
-        item: '等待穿搭推荐...'
+        temp: '--',
+        tempRange: '低温 -- / 高温 --',
+        condition: '等待数据',
+        city: '未定位',
+        item: '等待灵感...'
     }
   },
 };
