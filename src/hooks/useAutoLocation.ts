@@ -39,8 +39,9 @@ export const useAutoLocation = ({ language, onLocationFound, onToast }: AutoLoca
                         if (response.ok) {
                             const data = await response.json();
                             const address = data.address;
-                            // Priority check for city-level name
-                            const cityName = address.city || address.town || address.district || address.county || address.state;
+                            // Priority check for city-level name (City -> District -> County)
+                            // Exclude 'town', 'village' to ensure weather API compatibility
+                            const cityName = address.city || address.district || address.county || address.state;
 
                             if (cityName) {
                                 const msg = language === 'en' ? 'Located:' : '已定位到：';
