@@ -1,11 +1,12 @@
 export type Language = 'en' | 'cn';
 export type Gender = 'male' | 'female';
 export type Theme = 'sakura' | 'malibu' | 'pistachio' | 'lavender';
+export type ModelAlias = 'nano-banana' | 'nano-banana-pro';
 
 export interface Settings {
   apiKey: string;
   baseUrl: string; // For custom proxy if needed, though usually standard
-  model: 'nano-banana' | 'nano-banana-pro';
+  model: ModelAlias;
 }
 
 export interface WeatherData {
@@ -39,4 +40,35 @@ export interface ToastMessage {
   id: string;
   message: string;
   type: 'success' | 'error' | 'info';
+}
+
+// Strictly Typed Translations used in UI
+export interface Translations {
+  appTitle: string;
+  searchPlaceholder: string;
+  weatherTitle: string;
+  outfitTitle: string;
+  generateBtn: string;
+  settings: string;
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  testConnection: string;
+  save: string;
+  gender: { male: string; female: string };
+  loading: string;
+  generating: string;
+  error: string;
+  success: string;
+  enterKey: string;
+  testSuccess: string;
+  testFail: string;
+  emptyCity: string;
+  placeholders: {
+    temp: string;
+    tempRange: string;
+    condition: string;
+    city: string;
+    item: string;
+  }
 }

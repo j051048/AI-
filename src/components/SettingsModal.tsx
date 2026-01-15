@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Modal } from './ui/Modal';
 import { Settings, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
@@ -13,7 +13,7 @@ interface Props {
   onTest: (s: Settings) => void;
 }
 
-export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSave, lang, onTest }) => {
+export const SettingsModal: React.FC<Props> = memo(({ isOpen, onClose, settings, onSave, lang, onTest }) => {
   const t = TRANSLATIONS[lang];
   const [localSettings, setLocalSettings] = useState<Settings>(settings);
   const [showKey, setShowKey] = useState(false);
@@ -41,14 +41,14 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
         <div>
           <label className="block text-white/70 text-sm mb-1">{t.apiKey}</label>
           <div className="relative">
-            <input 
+            <input
               type={showKey ? "text" : "password"}
               value={localSettings.apiKey}
               onChange={(e) => handleChange('apiKey', e.target.value)}
               className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50 pr-10"
               placeholder="AIzaSy..."
             />
-            <button 
+            <button
               onClick={() => setShowKey(!showKey)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
             >
@@ -62,8 +62,8 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
 
         <div>
           <label className="block text-white/70 text-sm mb-1">{t.baseUrl}</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={localSettings.baseUrl}
             onChange={(e) => handleChange('baseUrl', e.target.value)}
             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/50"
@@ -78,11 +78,10 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
               <button
                 key={m}
                 onClick={() => handleChange('model', m)}
-                className={`py-2 px-3 rounded-xl text-sm transition-all ${
-                  localSettings.model === m 
-                    ? 'bg-white text-purple-600 font-bold' 
+                className={`py-2 px-3 rounded-xl text-sm transition-all ${localSettings.model === m
+                    ? 'bg-white text-purple-600 font-bold'
                     : 'bg-white/5 text-white/70 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 {m}
               </button>
@@ -91,14 +90,14 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
         </div>
 
         <div className="pt-4 flex gap-3">
-           <button 
+          <button
             onClick={() => onTest(getCleanSettings())}
             className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium flex items-center justify-center gap-2 transition-colors"
           >
-            <Wifi className="w-4 h-4" />
+            <Wifi className="w-4 h-4 text-white/80" />
             {t.testConnection}
           </button>
-          <button 
+          <button
             onClick={handleSave}
             className="flex-1 py-3 rounded-xl bg-white text-purple-600 font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors shadow-lg"
           >
@@ -109,4 +108,6 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, settings, onSa
       </div>
     </Modal>
   );
-};
+});
+
+SettingsModal.displayName = 'SettingsModal';
